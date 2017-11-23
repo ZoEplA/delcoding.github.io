@@ -78,7 +78,7 @@ categories: jekyll update
 	
 所以将题目中给出的字符进行清洗，去除非字母字符包括数字。然后写个python脚本 。
 
-```
+```python
 import re
 Str = ‘………..’
 arr = re.findall('.{5}', str)
@@ -216,7 +216,7 @@ Base64解密后可得：SteppinStones42Pie
 
 Base64解码：
 
-```
+```html
 <html>
 <body>
 <pre>NOTHING HERE????</pre>
@@ -258,7 +258,7 @@ apt install tesseract-ocr。
 
 编写python脚本：
 
-```
+```python
 import requests
 import os
 
