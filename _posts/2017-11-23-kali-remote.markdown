@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Wechall WriteUp"
+title: "Windows 远程连接 kali"
 date: 2017-11-23 11:47:56
 categories: jekyll update
 ---
