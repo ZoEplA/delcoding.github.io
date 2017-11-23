@@ -1,3 +1,10 @@
+---
+layout: post
+title: "Wechall WriteUp"
+date: 2017-11-23 11:47:56
+categories: jekyll update
+---
+
 **这篇文章成功解决了windows下远程连接 kali 的一些问题，免去了网上一些教程中提到的卸载桌面再安装桌面的步骤。**
 
 >本篇教程的系统环境为：

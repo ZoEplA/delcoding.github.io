@@ -5,7 +5,7 @@ date: 2017-11-23 11:47:56
 categories: jekyll update
 ---
 
-	初入ctf，写下记录以便查看。这里是wechall的一些题解。
+初入ctf，写下记录以便查看。这里是wechall的一些题解。
 
 ### 目录
 
