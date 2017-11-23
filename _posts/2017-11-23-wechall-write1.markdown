@@ -45,7 +45,7 @@ categories: jekyll update
 	<img src="/images/posts/writeup1/5.png" height="300" width="500">  
 </div>
 
- 	打开burpsuite，抓包改包。修改If-None-Match的值，请求更新数据，因为服务器一开始会分配Etag，然后下次检测时会对比两者的值，如果一样就不更新数据，导致无法投票。
+ 打开burpsuite，抓包改包。修改If-None-Match的值，请求更新数据，因为服务器一开始会分配Etag，然后下次检测时会对比两者的值，如果一样就不更新数据，导致无法投票。
 
 然后投票成功，通过题目。
 <div align="center">
@@ -70,13 +70,14 @@ categories: jekyll update
 <div align="center">
 	<img src="/images/posts/writeup1/8.png" height="300" width="500">  
 </div>
-
-	**假如我要加密‘hello’，按照第一种方法加密的结果为：aabbb,aabaa,ababa,ababa,abbab；第二种为：aabbb,aabaa,ababb,ababb,abbba。
+<p>
+**假如我要加密‘hello’，按照第一种方法加密的结果为：aabbb,aabaa,ababa,ababa,abbab；第二种为：aabbb,aabaa,ababb,ababb,abbba。
 假如要解密‘WOrld…’，把整个字符串的大小写代表着‘A’、‘B’编码，所以这里有两个编码可能性，一是大写代表‘A’，小写代表‘B’，第二种相反。同时这里又有两种密码表，所以这里一共有2*2=4种可能性。
 大写代表‘A’，小写代表‘B’，用第一种密码表可得：‘h’，第二种为：‘h’，这里刚好一样。
-大写代表‘B’，小写代表‘A’，用第一种密码表没有结果，第二种为：‘y’。**
-	
+大写代表‘B’，小写代表‘A’，用第一种密码表没有结果，第二种为：‘y’。
+
 所以将题目中给出的字符进行清洗，去除非字母字符包括数字。然后写个python脚本 。
+
 
 ```python
 import re
