@@ -95,7 +95,7 @@ categories: jekyll update
 &emsp;首先找到php.ini文件，如果不知道位置可通过find找到。在xampp下是/opt/lampp/etc/php.ini
 <p>
 &emsp;然后将xdebug.so路径添加进配置文件，不知道路径同样使用find查找。Xampp下是在 /opt/xdebug-2.5.4/modules/xdebug.so。在文尾添加：
-
+</p>
     zend_extension=” /opt/xdebug-2.5.4/modules/xdebug.so”
 
 再将如下配置添加到末尾：
