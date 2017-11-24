@@ -10,6 +10,7 @@ categories: jekyll update
 
 **涉及手段： %00截断、文件覆盖**
 
+## 实战
 &emsp;一开始，尝试在文件名后截断，但全都无果，Google后发现篇paper，使用之，成功upload。`主要思路文件夹截断，并把文件夹名当作上传文件名，从而绕过对文件名的验证`。
 
 &emsp;Step 1：在本地编辑好PHP一句话，并且保存为txt格式。（不免杀）
@@ -22,16 +23,16 @@ categories: jekyll update
     <img src="/images/posts/shizhan/2.png" >  
 </div>
 
-&emsp;Step 3：用burpsuite抓包，在文件夹路径下写好上传后的问价名，并在最后用%00截断，如下图：
+&emsp;Step 3：用burpsuite抓包，在文件夹路径下写好`上传后`的文件名，并在最后用`%00截断`，如下图：
 <div align="center">
     <img src="/images/posts/shizhan/3.png" >  
 </div>
-
+<br>
 <div align="center">
     <img src="/images/posts/shizhan/4.png" >  
 </div>
 
-&emsp;Step 4：改好后放行，可以看到文件成功上传，然后访问返回的command.php。
+&emsp;Step 4：改好后放行，可以看到文件成功上传，然后访问返回的`command.php`。
 <div align="center">
     <img src="/images/posts/shizhan/5.png" >  
 </div>
@@ -42,3 +43,8 @@ categories: jekyll update
 </div>
 
 &emsp;Step 6：同样的方法可用于一句话上传，然后使用菜刀连接。
+
+## 参考链接
+<a href="http://secureyes.net/nw/assets/File-Upload-Vulnerability-in-FCKEditor.pdf">File-Upload-Vulnerability-in-FCKEditor.pdf</a>
+<br>
+<a href="http://3xp10it.cc/web/2016/08/12/fckeditor%E5%90%84%E7%89%88%E6%9C%AC%E7%BB%95%E8%BF%87/">FCKeditor各版本绕过</a>
