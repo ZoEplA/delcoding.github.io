@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Selenium下自动识别验证码登陆"
+title: Selenium下自动识别验证码登陆
 date: 2017-11-29 0:0:0
 categories: jekyll update
 ---
@@ -9,8 +9,8 @@ categories: jekyll update
 &emsp;在自动化或者爬虫登陆网站时经常遇到验证码模块，这也算是反爬的一种手段。这篇文章将介绍如何在selenium框架下自动识别验证码登陆。
 
 ### 一：安装Tesseract-ocr
-&emsp;Tesseract-ocr是文字识别系统，能识别英文、数字，如果需要识别汉字，则需要导入汉字语言包。
-&emsp;* **在window下安装**
+&emsp;Tesseract-ocr是文字识别系统，能识别英文、数字，如果需要识别汉字，则需要导入汉字语言包。<br>
+* **在Windows下安装**<br>
 &emsp;&emsp;下载地址：<a href="https://digi.bib.uni-mannheim.de/tesseract/">Tesseract-ocr</a>，这里可以选择版本，本机中选择<a href="https://digi.bib.uni-mannheim.de/tesseract/tesseract-ocr-setup-4.0.0-alpha.20170804.exe">4.0.0版</a>。下载后默认安装，这里可以选择修改原安装路径，但修改后在后续进行环境变量的配置时记得更改。
 &emsp;&emsp;安装完毕后，配置系统环境变量。在Path一项中新增Tesseract-ocr的安装路径。
 <div align="center">
@@ -27,7 +27,7 @@ categories: jekyll update
     <img src="/images/posts/other/11.png" >  
 </div>
 
-&emsp;* **在Linux下安装**
+* ** 在Linux下安装**<br>
 &emsp;&emsp;直接执行：apt install tesseract-ocr。
 
 ### 二：python脚本
