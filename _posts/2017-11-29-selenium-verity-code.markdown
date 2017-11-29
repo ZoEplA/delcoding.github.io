@@ -27,7 +27,7 @@ categories: jekyll update
     <img src="/images/posts/other/11.png" >  
 </div>
 
-* ** 在Linux下安装**<br>
+* **在Linux下安装**<br>
 &emsp;&emsp;直接执行：apt install tesseract-ocr。
 
 ### 二：python脚本
