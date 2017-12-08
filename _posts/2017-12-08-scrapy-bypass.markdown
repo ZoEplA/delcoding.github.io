@@ -11,7 +11,7 @@ categories: jekyll update
 ### 正文
 &emsp;&emsp;遇到的检测网页是类似：xxx.com浏览器安全检查中...，如下：
 <div align="center">
-    <img src="/images/posts/other/12.png" />  
+    <img src="/images/posts/other/12.jpg" />  
 </div>
 
 &emsp;&emsp;这个网页检测的方法是让浏览器执行一段JS代码，将执行结果作为表单的值，跟其他隐藏值一起提交。这个网页的类似代码如下：
