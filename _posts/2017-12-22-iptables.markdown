@@ -23,7 +23,7 @@ iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 
 ### 为SSH加固
 ```shell
-iptables -I INPUT -p icmp --icmp-type 8 -m length --length 128 -m recent --set --name SSH --rsource -j ACCEPT
+iptables -A INPUT -p icmp --icmp-type 8 -m length --length 128 -m recent --set --name SSH --rsource -j ACCEPT
 ```
 &emsp;&emsp;`length`模块用于匹配报文长度，这里我们用ping报文的长度来充当芝麻开门的作用，`recent`模块功能很强，能将匹配到的报文信息记录下来，给后续规则做条件使用。它的几个参数为：
 * ---name： 给用来记录报文的列表起名称；（这里应该是两个-）
@@ -71,6 +71,24 @@ iptables -A INPUT -p tcp --dport 8888 -m state --state NEW -m recent --rcheck --
 iptables -A INPUT -j DROP
 ```
 &emsp;&emsp;我们在INPUT链的最后一条上加上`DROP`规则，这样即使我们不小心`iptables -F INPUT`清除掉INPUT规则也不用担心服务器失联。
+
+&emsp;&emsp;值得一提的是，由于采用了DROP策略，所以ping只接收长度为100的报文，也就是说正常的ping是`不会被服务器接收`的，这就提供了保护主机的安全的方法，相当于把主机从公网中`隐藏`起来，只有知道口令的人才能找得到。
+
+
+### 保存iptables配置
+&emsp;&emsp;笔者主机为：Ubuntu 16.04，首先安装：
+```shell
+apt install iptables-persistent
+apt install netfilter-persistent    # ubuntu 14.04可以不用
+```
+&emsp;&emsp;保存：
+```shell
+netfilter-persistent save
+```
+&emsp;&emsp;在/etc/rc.local中添加开机时自动执行恢复操作：
+```shell
+netfilter-persistent reload
+```
 
 ### 后言
 &emsp;&emsp;这里只是简单的在INPUT中加固了ssh连接，但对其他类似web的服务没有讲解，但这并不是说iptables对这些服务没有办法，相反，iptables能很好的加强系统安全。比如有些服务不想暴露给外部直接访问，只允许本地处理。这时我们就能使用类似于这样的规则：
