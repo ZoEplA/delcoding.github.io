@@ -1,0 +1,85 @@
+---
+layout: post
+title: "通过iptables配置加强服务器安全"
+date: 2017-12-23 00：00
+categories: jekyll update
+---
+
+## 绪言
+&emsp;&emsp;VPS在公网上使用得越来越多，如何提高自己的服务器安全也变得重要起来，特别是脚本横飞的时代，如果不对服务器加以修饰，每天`lastb`的记录都能增加很多。而且对外提供越多的服务意味着暴露的缺陷就越多，所以掌握`iptables`的基本使用中解决很多问题。
+
+### 主动模式
+```shell
+iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+```
+&emsp;&emsp;首先对自己`主动`发送的请求进行响应的报文放行，这里尤其注意是对自己已发送的报文进行响应，如果是其他客户端发送过来的请求连接这里不做处理，使用`默认的`或后续的匹配策略处理。
+因为在iptables看来每个协议都有`建立连接`的概念，包括“udp”、“icmp”。`state`支持的状态有：NEW、ESTABLISHED、RELATED、INVALID、UNTRACKED。
+
+* NEW：就是双方进行通信时第一个到来的报文；
+* ESTABLISHED：state把NEW以后到来的报文都定义为ESTABLISHED状态，包括UDP等，所以说state是有类似于tcp三次握手建立连接的概念；
+* RELATED：在一个服务中，可能开启了两个进程，而且这两个进程都需要跟服务器进行通信，例如FTP有两个通信链路，命令链路和传输数据的链路，这两个链路就是存在关系的，所以他们属于RELATED状态；
+* INVALID：表示一个包不能被识别；
+* UNTRACKED：表示报文不能被追踪；
+
+### 为SSH加固
+```shell
+iptables -I INPUT -p icmp --icmp-type 8 -m length --length 128 -m recent --set --name SSH --rsource -j ACCEPT
+```
+&emsp;&emsp;`length`模块用于匹配报文长度，这里我们用ping报文的长度来充当芝麻开门的作用，`recent`模块功能很强，能将匹配到的报文信息记录下来，给后续规则做条件使用。它的几个参数为：
+* --name： 给用来记录报文的列表起名称；
+* --set： 表示将匹配到的报文记录下来；
+* --rsource: 表示记录源IP地址；
+&emsp;&emsp;这条指令的意思是：将ping报文长度为128的源IP地址记录到叫SSH的列表中去。这里需要注意的是ping报文头部长度就有28字节，所以实际的填充报文为：128-28=100。所以在Linux下使用`ping -s 100 ip`；在Windows下使用`ping -l 100 ip`来敲开服务器大门。
+
+&emsp;&emsp;相关的icmp报文的类型如下（因为ssh客户端是ping的请求方（发起方），所以这里要匹配类型为8的报文）：
+
+类型代码 |类型描述               
+--------|----------------------
+0       |响应应答（ECHO-REPLY）  
+3       |不可到达                
+4       |源抑制                  
+5       |重定向                 
+8       |响应请求（ECHO-REQUEST）
+11      |超时                    
+12      |参数失灵                 
+13      |时间戳请求               
+14      |时间戳应答               
+15      |信息请求（*已作废）       
+16      |信息应答（*已作废）       
+17      |地址掩码请求              
+18      | 地址掩码应答             
+
+
+```shell
+iptables -A INPUT -p tcp --dport 8888 -m state --state NEW -m recent --rcheck --seconds 20 --name SSH --rsource -j ACCEPT
+```
+&emsp;&emsp;8888是ssh修改后的端口号，这里之所以匹配NEW状态是因为后面我们需要对INPUT使用`白名单`策略，而NEW之后的状态在前面已经放行，所以这里需要对NEW状态进行放行。这里再对recent的两个参数进行说明：
+
+* --rcheck： 检查源IP是否在列表中，以第一个匹配开始计算时间
+* --seconds： 记录的源IP地址的有效时间
+
+&emsp;&emsp;所以这一整句话是说对NEW（新建）状态下请求8888端口的源IP进行检查，看这个IP是否在名叫SSH的列表之中，有效时间是20秒，这里的有效时间是指上一条规则记录下源IP的时间离用户请求SSH服务器的时间间隔。所以用户必须在ping完的20秒内连接客户端，否则连接失败，重新ping。
+
+    PS： 如果是私有的git服务器的话，也同样适用这套规则，登陆或clone、push前都需要进行特殊的操作，这就能很好的保护数据和服务器的安全问题。不要以为这是弱智的问题，，这两天逛tools的时候就有人的git服务器被人攻破。。。
+
+### 将INPUT策略改成白名单模式
+&emsp;&emsp;白名单是`只接受自己信任`的来源，而对非信任区来源采用拒绝策略；黑名单则只拒绝自己不信任的来源，接受`信任或目的不明确`的来源。所以采用白名单的策略系统的安全性较高，而黑名单难免会有疏忽。
+
+&emsp;&emsp;要使用白名单，只需将INPUT的默认策略从ACCEPT改成DROP。可以使用`iptables -P DROP`,但如果一不小心清空了`ACCEPT`的规则，那么服务器将按照默认drop的策略拒绝所有的连接，导致服务器失联。所以我们使用另一种较为安全的策略：
+```shell
+iptables -A INPUT -j DROP
+```
+&emsp;&emsp;我们在INPUT链的最后一条上加上`DROP`规则，这样即使我们不小心`iptables -F INPUT`清除掉INPUT规则也不用担心服务器失联。
+
+### 后言
+&emsp;&emsp;这里只是简单的在INPUT中加固了ssh连接，但对其他类似web的服务没有讲解，但这并不是说iptables对这些服务没有办法，相反，iptables能很好的加强系统安全。比如有些服务不想暴露给外部直接访问，只允许本地处理。这时我们就能使用类似于这样的规则：
+```shell
+iptables -I INPUT ! -s 127.0.0.1 -j DROP
+```
+&emsp;&emsp;通过配置iptables还可以在有限程度上防止`CC攻击`、`DDOS`等攻击，它可用的一些模块还有：
+
+* string： 可以匹配链路中出现的特定字符；
+* time： 对链路的时间规则；
+* limit： 对IP的并发限制；
+
+这在后续博文中可能有所涉及。
