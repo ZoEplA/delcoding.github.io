@@ -26,9 +26,10 @@ iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -I INPUT -p icmp --icmp-type 8 -m length --length 128 -m recent --set --name SSH --rsource -j ACCEPT
 ```
 &emsp;&emsp;`length`模块用于匹配报文长度，这里我们用ping报文的长度来充当芝麻开门的作用，`recent`模块功能很强，能将匹配到的报文信息记录下来，给后续规则做条件使用。它的几个参数为：
-* ---name： 给用来记录报文的列表起名称；
+* ---name： 给用来记录报文的列表起名称；（这里应该是两个-）
 * ---set： 表示将匹配到的报文记录下来；
 * ---rsource: 表示记录源IP地址；
+
 &emsp;&emsp;这条指令的意思是：将ping报文长度为128的源IP地址记录到叫SSH的列表中去。这里需要注意的是ping报文头部长度就有28字节，所以实际的填充报文为：128-28=100。所以在Linux下使用`ping -s 100 ip`；在Windows下使用`ping -l 100 ip`来敲开服务器大门。
 
 &emsp;&emsp;相关的icmp报文的类型如下（因为ssh客户端是ping的请求方（发起方），所以这里要匹配类型为8的报文）：
