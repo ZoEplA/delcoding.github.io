@@ -25,11 +25,13 @@ categories: jekyll update
 
 ### <a name="2"></a>安装及配置uwsgi
 &emsp;&emsp;在django的python环境中执行：`pip install uwsgi`即可。
+
 &emsp;&emsp;配置uwsgi，本文采用.ini的文件形式配置。新建一个新的文件夹，可以在任意位置。如本文中在与django项目同级的目录下新建一个名为：uwsgi的文件夹，名字可以任意取。
 <div align="center">
     <img src="/images/posts/other/13.png" >  
 </div>
 &emsp;&emsp;其中`web`是项目文件夹，`uwsgi`文件夹用来存放uwsgi的配置文件和日志等。
+
 &emsp;&emsp;在uwsgi中新建一个`uwsgi.ini`的文件，具体内容如下：
 ```shell
 # uwsig使用配置文件启动
@@ -110,6 +112,7 @@ server {
 uwsgi --ini uwsgi.ini
 ```
 &emsp;&emsp;执行后会在该文件夹下生成uwsgi.log用来记录uwsgi日志，我们可以先查看一下该文件，以保证我们的uwsgi服务是正常的。
+
 &emsp;&emsp;然后我们启动nginx：
 ```shell
 service nginx start
@@ -122,7 +125,9 @@ service nginx stop
 
 ### <a name="5"></a>部署中遇到的问题及解决方案
 &emsp;&emsp;这里我访问网站后发现是`502`错误，这也是我遇到的一个大坑，很多博客都没有解释和解决掉这个问题。
+
 &emsp;&emsp;出现502后查看日志文件：`cat /var/log/nginx/access.log`，发现是权限问题，原来nginx默认是`www-data`用户运行，但该用户没有权限访问`root`下的目录文件，所以导致服务器出现错误。所以我们需要以`root`身份运行，但root实在是太敏感，所以上面专门添加的用户`junay`就起作用了。
+
 &emsp;&emsp;首先我们修改junay的权限，通过：`vim /etc/passwd`，将juany修改成如下：
 ```shell
 junay:x:0:0:,,,:/home/junay:/usr/bin/git-shell
