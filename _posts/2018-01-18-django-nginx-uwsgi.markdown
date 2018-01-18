@@ -10,10 +10,11 @@ categories: jekyll update
 
 ### 目录
 * [一：部署概述](#1)
-* [二：安装及配置uwsgi](#2)
-* [三：安装及配置nginx](#3)
-* [四：启动服务](#4)
-* [五：部署中遇到的问题及解决方案](#5)
+* [二：收集项目中的静态文件](#2)
+* [三：安装及配置uwsgi](#3)
+* [四：安装及配置nginx](#4)
+* [五：启动服务](#5)
+* [六：部署中遇到的问题及解决方案](#6)
 
 ### <a name="1"></a>部署概述
 &emsp;&emsp;在本文中采用`nginx + uwsgi`的部署方案，这也是目前较为受欢迎的方案。先放一张整个系统的架构图：
@@ -23,7 +24,19 @@ categories: jekyll update
 
 &emsp;&emsp;在这个方案中，nginx主要处理静态页面，而uwsgi处理动态页面，整个系统对外体现为nginx，当nginx发现请求的是动态页面时会将请求发送给uwsgi处理，这两者之间的通信桥梁可以是端口或者sock的形式，本文采用sock文件的形式，听说这种方式比端口通信更加有效。
 
-### <a name="2"></a>安装及配置uwsgi
+### <a name="2"></a>收集项目中的静态文件
+&emsp;&emsp;很多博客里都把这一步放到最后，但这给刚学部署的人很不好的体验，使人无法对整个部署过程很模糊，所以我这里先收集项目中的静态文件。说明：静态文件的位置`没有要求`，收集静态文件的目的是让nginx更好的处理它，如果直接使用APP里的静态文件会`导致`后台Admin的css、js等`无法加载`，所以我们需要先收集静态文件。
+
+&emsp;&emsp;在项目的`setting.py`中添加静态文件存放的目录，添加内容如下：
+```python
+STATIC_URL = '/static/'
+# STATIC_ROOT就是静态文件的路径，可以自由设置，下面配置uwsgi、nginx需要使用到这个路径
+STATIC_ROOT = '/root/django/static/'
+```
+
+&emsp;&emsp;在`manage.py`的目录下运行`python manage.py collectstatic`收集静态文件。
+
+### <a name="3"></a>安装及配置uwsgi
 &emsp;&emsp;在django的python环境中执行：`pip install uwsgi`即可。
 
 &emsp;&emsp;配置uwsgi，本文采用.ini的文件形式配置。新建一个新的文件夹，可以在任意位置。如本文中在与django项目同级的目录下新建一个名为：uwsgi的文件夹，名字可以任意取。
@@ -49,9 +62,8 @@ pidfile=/root/django/uwsgi/uwsgi.pid
 # 如果开启了可以不用开启nginx服务而直接通过 ip:8080访问网页。       
 # http=192.168.2.108:8080
 
-# 指定静态文件，这里可以不用收集的静态文件夹，而是使用APP里的static目录
-# 如web是项目根目录，security是项目里一个app
-static-map=/static=/root/django/web/security/static
+# 这里使用上面收集的静态文件夹目录
+static-map=/static=/root/django/static
 # 启动uwsgi的用户名和用户组
 uid=junay
 gid=root
@@ -72,7 +84,7 @@ daemonize=/root/django/uwsgi/uwsgi.log
 ```
 &emsp;&emsp;上面配置文件的每一条都有详细的说明，请大家仔细阅读。这里需要注意的是，我为这个项目专门添加了一个`junay`的用户，并且将它添加到`root`用户组。后面我还是使用这个用户开启nginx服务。我们需要特别注意用户权限的问题，这个问题也困扰了我两天。
 
-### <a name="3"></a>安装及配置nginx
+### <a name="4"></a>安装及配置nginx
 &emsp;&emsp;nginx直接使用apt安装即可。安装完成后我们在`/etc/nginx/conf.d/`目录下为nginx与uwsgi通信建立配置文件。文件名可以任意，内容如下：
 ```shell
 server { 
@@ -98,15 +110,15 @@ server {
         uwsgi_pass unix:/root/django/uwsgi/uwsgi.sock; 
     }
 
-    # 指定静态文件路径
+    # 这里使用上面收集的静态文件夹目录
     location /static/ {
-    alias /root/django/web/security/static/;
+    alias /root/django/static/;
     index index.html index.htm;
     }
 }
 ```
 
-### <a name="4"></a>启动服务
+### <a name="5"></a>启动服务
 &emsp;&emsp;接下来我们启动uwsgi，进入刚才新建的uwsgi文件夹，通过配置文件启动uwsgi：
 ```shell
 uwsgi --ini uwsgi.ini
@@ -123,7 +135,7 @@ killall -9 uwsgi
 service nginx stop
 ```
 
-### <a name="5"></a>部署中遇到的问题及解决方案
+### <a name="6"></a>部署中遇到的问题及解决方案
 &emsp;&emsp;这里我访问网站后发现是`502`错误，这也是我遇到的一个大坑，很多博客都没有解释和解决掉这个问题。
 
 &emsp;&emsp;出现502后查看日志文件：`cat /var/log/nginx/access.log`，发现是权限问题，原来nginx默认是`www-data`用户运行，但该用户没有权限访问`root`下的目录文件，所以导致服务器出现错误。所以我们需要以`root`身份运行，但root实在是太敏感，所以上面专门添加的用户`junay`就起作用了。
