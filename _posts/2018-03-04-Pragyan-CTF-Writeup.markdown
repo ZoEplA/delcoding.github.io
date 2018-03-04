@@ -47,6 +47,7 @@ categories: jekyll update
     <img src="/images/posts/pragyan/8.png" >  
 </div>
 &emsp;&emsp;上来看到这个猜测十有八九就是`文件包含`，但将常见的文件包含跟绕过试了一遍都`没有`结果。所以这道题就进展不下去。
+
 &emsp;&emsp;看到writeup后才发现关键点不在这个url，在查看`网页源代码`的时候会发现两个`带下划线`的url，`经自己不成熟总结，一般这样的链接都有猫腻。。。`而且可以发现标题的图标也一直在变，仿佛在提醒你。。。
 <div align="center">
     <img src="/images/posts/pragyan/9.png" >  
@@ -55,7 +56,7 @@ categories: jekyll update
 <div align="center">
     <img src="/images/posts/pragyan/10.png" >  
 </div>
-&emsp;&emsp;发现这又是一个文件包含，并且能包含php。所以查看index.php的代码。
+&emsp;&emsp;发现这又是一个文件包含，并且`能包含php`。所以查看index.php的代码。
 <div align="center">
     <img src="/images/posts/pragyan/11.png" >  
 </div>
