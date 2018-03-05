@@ -10,11 +10,13 @@ categories: jekyll update
 
 &emsp;&emsp;python3 base64编码问题的解决方法为：
 ```python
-base64.b64encode(test3.encode('utf-8')) # 先将string型的test3转换成bytes加密
-testi = str(testi, encoding='utf-8') # 再将bytes型的testi转换成string
+# 先将string型的test3转换成bytes加密
+testi = base64.b64encode(test3.encode('utf-8'))
+# 再将bytes型的testi转换成string
+testi = str(testi, encoding='utf-8')
 ```
 
-&emsp;&emsp;详细代码如下：
+&emsp;&emsp;脚本中为了提高爆破效率使用了`二分查找`的方法，并且使用返回页面的`大小`作为正确与否的判断，详细代码如下：
 ```python
 # -*- coding:utf-8 -*-
 from time import sleep
