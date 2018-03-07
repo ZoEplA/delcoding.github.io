@@ -295,3 +295,6 @@ html = r.post(url, data)
 print(html.text)
 ```
 &emsp;&emsp;要注意的是，后面的一串还要进行一次base64解码才能得到`数字`。
+<div align="center">
+    <img src="/images/posts/bugku/27.png" >  
+</div>
