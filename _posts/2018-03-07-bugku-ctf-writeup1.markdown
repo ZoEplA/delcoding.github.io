@@ -240,4 +240,58 @@ echo $age;  // 60
     <img src="/images/posts/bugku/25.png" >  
 </div>
 
+### 秋名山老司机
+&emsp;&emsp;题目描述：
+>亲请在2s内计算老司机的车速是多少
+>1741242492-1033554030-217864531-2107975482+1148641444-1741096300+1743626951*378263735*21637778+861571530+717037212=?;
 
+&emsp;&emsp;附上python脚本如下，这里重要的函数是`eval()`：
+```python
+# -*- coding:utf-8 -*-
+
+import requests
+from bs4 import BeautifulSoup
+url='http://120.24.86.145:8002/qiumingshan/'
+r=requests.session()
+requestpage = r.get(url)
+soup = BeautifulSoup(requestpage.content, 'lxml')
+ans=soup.select('div')[0].get_text()[:-3]
+print(ans)
+post=eval(ans)#计算表达式的值
+data={'value':post}#构造post的data部分
+flag=r.post(url,data=data)
+print(flag.text)
+```
+
+### 速度要快
+&emsp;&emsp;题目描述：
+<div align="center">
+    <img src="/images/posts/bugku/26.png" >  
+</div>
+&emsp;&emsp;要注意的是`margin`，这是一个数字，这也是后面的一个小坑。
+
+&emsp;&emsp;用burpsuite抓包可以发现，http的头部有flag，并且一看就是base64编码过的。
+<div align="center">
+    <img src="/images/posts/bugku/27.png" >  
+</div>
+&emsp;&emsp;最后的脚本：
+```python
+# -*- coding:utf-8 -*-
+import requests
+import base64
+
+url = 'http://120.24.86.145:8002/web6/'
+r = requests.session()
+html = r.get(url)
+bs = html.headers['flag']
+key = base64.b64decode(bs)
+key = str(key, encoding='utf-8')
+print(key)
+key = key.split(' ')[1]
+key = str(base64.b64decode(key), encoding='utf-8')
+print(key)
+data = {'margin':key}
+html = r.post(url, data)
+print(html.text)
+```
+&emsp;&emsp;要注意的是，后面的一串还要进行一次base64解码才能得到`数字`。
