@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "bugku ctf writeup1"
-date: 2018-03-07 22：40
+title: "bugku ctf writeup2"
+date: 2018-03-08 22：40
 categories: jekyll update
 ---
 
@@ -58,10 +58,13 @@ else
 ```
 &emsp;&emsp;可以看到flag文件已经暴露出来，直接访问也可以拿到flag。但这里介绍绕过检测拿到flag的方法。可以看到满足拿flag的条件有三个：
 * **一：id**
+
 &emsp;&emsp;&emsp;&emsp;id既要不等于0（`if(!$_GET['id'])`），又要等于0（`$id==0`）。所以这里我们要利用php的松散性，`字符串跟0比较（==）是成立的`，所以payload：`"aaa" == 0`
 * **二：php伪协议**
+
 &emsp;&emsp;&emsp;&emsp;`$data = @file_get_contents($a,'r');`的存在可以使用`php://input`在绕过，所以：`a=php://input`，然后在`post`bugku is a nice plateform!。
 * **三：字符截断**
+
 * &emsp;&emsp;&emsp;&emsp;假设：
 ```php
 $b = "%0012345"
