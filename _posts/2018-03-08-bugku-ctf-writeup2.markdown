@@ -129,7 +129,7 @@ class Flag{//flag.php
 
 &emsp;&emsp;所以最终的payload为：
 <div align="center">
-    <img src="/images/posts/bugku/35.png" width="70%" />  
+    <img src="/images/posts/bugku/35.png" height="70%" />  
 </div>
 &emsp;&emsp;这里要注意的是`file=hint.php`，因为要利用php对象反序列化要`先声明对象`，所以要将hint.php包含进来。
 
