@@ -188,6 +188,91 @@ if( $IM ){
 <div align="center">
     <img src="/images/posts/bugku/41.png" />  
 </div>
+
+### 各种绕过
+&emsp;&emsp;题目代码：
+```php
+<?php 
+highlight_file('flag.php'); 
+$_GET['id'] = urldecode($_GET['id']); 
+$flag = 'flag{xxxxxxxxxxxxxxxxxx}'; 
+if (isset($_GET['uname']) and isset($_POST['passwd'])) { 
+    if ($_GET['uname'] == $_POST['passwd']) 
+        print 'passwd can not be uname.'; 
+    else if (sha1($_GET['uname']) === sha1($_POST['passwd'])&($_GET['id']=='margin')) 
+        die('Flag: '.$flag); 
+    else 
+        print 'sorry!'; 
+} 
+?>
+```
+&emsp;&emsp;`sha1`的绕过跟`md5`一样使用数组即可，注意请求的方式。
+<div align="center">
+    <img src="/images/posts/bugku/42.png" />  
+</div>
+
+### web8
+&emsp;&emsp;题目源码：
+```php
+<?php
+extract($_GET);
+if (!empty($ac))
+{
+$f = trim(file_get_contents($fn));
+if ($ac === $f)
+{
+echo "<p>This is flag:" ." $flag</p>";
+}
+else
+{
+echo "<p>sorry!</p>";
+}
+}
+?>
+```
+&emsp;&emsp;解题的关键在于`extract($_GET)`函数，它会将数组中的值按键值赋值，例如：`?id=1&name=junay&key=key`，经过`extract`的处理后会产生：
+```php
+$id = 1;
+$name = "junay";
+$key = "key";
+```
+&emsp;&emsp;所以我们构造`$ac`跟`$fn`，其中`$fn`使用`php://input`伪协议。最终的payload：
+<div align="center">
+    <img src="/images/posts/bugku/43.png" />  
+</div>
+
+### 细心
+&emsp;&emsp;打开页面发现是`404`，但是对这个站熟悉的话，正常返回的404是不一样的，所以这个404是骗人的，而且通过网络可以验证这一点。
+<div align="center">
+    <img src="/images/posts/bugku/44.png" />  
+</div>
+&emsp;&emsp;同时，这里看到`No such file or directory.`，还给你加红显示，估计就是想让你`爆目录`，拿出扫描工具，结果如下。
+<div align="center">
+    <img src="/images/posts/bugku/45.png" />  
+</div>
+&emsp;&emsp;访问`robots.txt`，可以发现线索。
+<div align="center">
+    <img src="/images/posts/bugku/46.png" />  
+</div>
+&emsp;&emsp;再跟下去可以发现真正的页面
+<div align="center">
+    <img src="/images/posts/bugku/47.png" height="70%" />  
+</div>
+&emsp;&emsp;因为题目说想办法变成admin，所以尝试构造`x=admin`试试，结果flag就出来了。
+<div align="center">
+    <img src="/images/posts/bugku/48.png" />  
+</div>
+
+
+### 求getshell
+&emsp;&emsp;题目：
+<div align="center">
+    <img src="/images/posts/bugku/49.png" />  
+</div>
+&emsp;&emsp;这道题是看writeup做出来的，一开始测试时没有想到改`Content-Type`，其实只需要将其中的一个字母`大写`就可以了，然后测试`php2, php3, php4, php5，phps, pht, phtm, phtml`，发现只有`php5`能绕过。所以payload就是：
+<div align="center">
+    <img src="/images/posts/bugku/50.png" />  
+</div>
 &emsp;&emsp;
 &emsp;&emsp;
 &emsp;&emsp;
