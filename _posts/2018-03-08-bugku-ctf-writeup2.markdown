@@ -172,7 +172,22 @@ show_source('flag.txt');
 var_dump(file("flag.txt"));
 print_r(file("flag.txt"));
 ```
-&emsp;&emsp;
+
+### 字符？正则？
+```php
+<?php 
+highlight_file('2.php');
+$key='KEY{********************************}';
+$IM= preg_match("/key.*key.{4,7}key:\/.\/(.*key)[a-z][[:punct:]]/i", trim($_GET["id"]), $match);
+if( $IM ){ 
+  die('key is: '.$key);
+}
+?>
+```
+&emsp;&emsp;这个还是比较简单的，其中一个payload：`?id=keyaaakeybbbbbkey:/c/dddkeye.`。
+<div align="center">
+    <img src="/images/posts/bugku/41.png" />  
+</div>
 &emsp;&emsp;
 &emsp;&emsp;
 &emsp;&emsp;
