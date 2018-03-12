@@ -411,5 +411,6 @@ if(!in_array($ext,$allowtype)){
 
 ## 参考链接
 <a href="https://fireshellsecurity.team/n1ctf-funning-eating-cms/">[*]N1CTF 2018 - Funning eating cms</a><br>
-<a href="http://seaii-blog.com/index.php/2017/04/26/49.html">[*]Web中的条件竞争漏洞</a>
-<a href="https://www.anquanke.com/post/id/84837">[*]GeekPwn2016跨次元CTF Writeup</a>
+<a href="http://seaii-blog.com/index.php/2017/04/26/49.html">[*]Web中的条件竞争漏洞</a><br>
+<a href="https://www.anquanke.com/post/id/84837">[*]GeekPwn2016跨次元CTF Writeup</a><br>
+<a href="http://sol.logdown.com/posts/2016/07/14/ais3-pre-exam-2016-part-write-up">[*]web</a>
