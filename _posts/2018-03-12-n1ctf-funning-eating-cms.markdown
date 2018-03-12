@@ -408,3 +408,8 @@ if(!in_array($ext,$allowtype)){
 &emsp;&emsp;至此，成功拿到`flag`。这道题自己学到了很多，也意识到了自己的经验还是不足，以后必将勤加练习，当然还是要留意细节跟善用搜索引擎。。。
 
 &emsp;&emsp;希望能在这条路上走远一点:)
+
+## 参考链接
+<a href="https://fireshellsecurity.team/n1ctf-funning-eating-cms/">[*]N1CTF 2018 - Funning eating cms</a><br>
+<a href="http://seaii-blog.com/index.php/2017/04/26/49.html">[*]Web中的条件竞争漏洞</a>
+<a href="https://www.anquanke.com/post/id/84837">[*]GeekPwn2016跨次元CTF Writeup</a>
