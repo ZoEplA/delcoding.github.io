@@ -318,6 +318,7 @@ include "templates/update.html";
 &emsp;&emsp;然后自己当时想到的点就是：
 * **1、绕过isadmin验证**
 * **2、绕过filter_directory()过滤**
+
 &emsp;&emsp;先尝试的进行`register`注册账号时进行注入，致使`isadmin`置为`1`，尝试构造了的payload：`hahaha','123','1')-- +`，但是可以看到有白名单限制，它过滤了空格，所以这个猜想看起来行不通。
 
 &emsp;&emsp;再进行`filter_directory`绕过时自己没有看出tips，看出来估计这里就不用停那么久了。。。后来逼得没办法了，就将它里面的关键代码拿去google了一下，这下还真有发现。
