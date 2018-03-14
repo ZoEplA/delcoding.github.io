@@ -74,7 +74,7 @@ action=../../../../../var/lib/php5/sess_5uu8r952rejihbg033m5mckb17
 ## 2、xdebug
 &emsp;&emsp;要使用`Xdebug`get shell，首先服务器要开启如下参数：
 <div align="center">
-    <img src="/images/posts/n1ctf/59.png" />  
+    <img src="/images/posts/n1ctf/60.png" />  
 </div>
 &emsp;&emsp;但pull下来的docker中，这个参数都不被满足，所以又只能记录利用方式，等以后碰到了方便查阅。
 <div align="center">
