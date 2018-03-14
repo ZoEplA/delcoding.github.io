@@ -43,6 +43,7 @@ categories: jekyll update
     <img src="/images/posts/n1ctf/31.png" />  
 </div>
 
+&emsp;&emsp;碰撞脚本：
 ```python
 # -*- coding: utf-8 -*-
 # running in python2
@@ -61,7 +62,7 @@ def cmp_md5(substr, stop_event, str_len, start=0, size=20):
             print rnds
             stop_event.set()
 if __name__ == '__main__':
-    substr = 'b825c'
+    substr = 'b825c'    # 修改此值
     start_pos = 0
     str_len = len(substr)
     cpus = multiprocessing.cpu_count()
@@ -74,6 +75,7 @@ if __name__ == '__main__':
     for p in processes:
         p.join()
 ```
+
 &emsp;&emsp;注册后我们登陆网站，然后打开发表页面。
 <div align="center">
     <img src="/images/posts/n1ctf/32.png" />  
@@ -108,7 +110,7 @@ wat`,(select case when ascii(substr((select password from ctf_users where is_adm
 &emsp;&emsp;这里作者就不再纠结这个问题了，最终`admin`的密码就是`nu1ladmin`。
 
 #### 二次注入
-&emsp;&emsp;除了盲注，这里作者还发现了一个博客中运用了更简单的payload，他使用了`二次注入`一次性直接将密码都出来，从操作上来看二次注入的步骤显然要比盲注简单很多，所以作者对这种手法再进行练习。原博客地址为：<a href="http://p0sec.net/index.php/archives/118/">p0's blog | 破</a>
+&emsp;&emsp;除了盲注，这里作者还发现了一个博客中运用了更简单的payload，他使用了`二次注入`一次性将密码直接注入出来，从操作上来看二次注入的步骤显然要比盲注简单很多，所以作者对这种手法再进行练习。原博客地址为：<a href="http://p0sec.net/index.php/archives/118/">p0's blog | 破</a>
 
 &emsp;&emsp;首先先注册一个新的用户，并且通过盲注确定他的`id`，然后进行二次注入，如：
 ```
@@ -133,11 +135,11 @@ signature=1`,1),(4,`admin333`,(select concat(username,0x2c,password) from ctf_us
 </div>
 
 ### 反序列化+SSRF
-&emsp;&emsp;其实通过审计，我们可以知道得到`admin`的密码是不够的，因为`admin`的`allow_diff_ip`是`=1`的，所以我们还是无法直接利用。其实比赛中看到了反序列化漏洞，但因为`Mood`类中并没有`魔术函数`，所以一直以为反序列化利用不了，所以也就卡壳了。后来证实自己的`知识面还是太窄了`:(
+&emsp;&emsp;其实通过审计，我们可以知道得到`admin`的密码是不够的，因为`admin`的`allow_diff_ip`是`=0`的，所以我们还是无法直接利用。其实比赛中看到了反序列化漏洞，但因为`Mood`类中并没有`魔术函数`，所以一直以为反序列化利用不了，所以也就卡壳了。后来证实自己的`知识面还是太窄了`:(
 
 &emsp;&emsp;到了这一步，我们就要怎么利用SSRF了，我这里想到了两个方法：
-* **1、修改admin的allow_diff_ip字段，是我们能直接登陆admin，然后上传**
-* **2、拿着你的session，去做admin的登录**
+* **1、修改admin的allow_diff_ip字段，使我们能直接登陆admin，然后上传**
+* **2、拿着你的session，去做admin的登录，然后上传**
 
 &emsp;&emsp;第一种因为被代码写死，所以无法利用。
 <div align="center">
@@ -333,7 +335,7 @@ for i in range(10000):
 </div>
 
 ### 拿到flag
-&emsp;&emsp;查看了一下文件，并没有发现`flag`文件。所以，flag应该在数据库中。然后发现了系统的配置脚本`run.sh`。里面暴露了`mysql`的账号密码，我们登陆`mysql`然后查询一下。sql语句如下：
+&emsp;&emsp;拿到shell后查看了文件，但没有发现`flag`文件。所以，flag应该在数据库中。然后发现了系统的配置脚本`run.sh`。里面暴露了`mysql`的账号密码，我们登陆`mysql`然后查询一下。sql语句如下：
 ```
 use flag;
 select * from flag;
