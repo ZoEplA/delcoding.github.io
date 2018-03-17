@@ -40,15 +40,15 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ImZhbHNlIn0.oe4qhTxvJB8nNAsFWJc
 </div>
 &emsp;&emsp;所以，我的加密密钥就是：54l7y。然后我们去验证一下，这个网站可以提供验证服务：<a href="https://jwt.io/" target="_blank">https://jwt.io/</a>。当我们使用破解出来的key时，我们能完美还原出原始数据，这证明我们的key是正确的。
 <div align="center">
-    <img src="/images/posts/other/21.png" width="70%" />  
+    <img src="/images/posts/other/21.png" width="50%" />  
 </div>
 &emsp;&emsp;最后我们把`false`改成`true`，然后使用key进行加密，可以得到如下：
 <div align="center">
-    <img src="/images/posts/other/22.png" width="70%" />  
+    <img src="/images/posts/other/22.png" width="50%" />  
 </div>
 &emsp;&emsp;然后我们拿着这个token刷新一下：
 <div align="center">
-    <img src="/images/posts/other/22.png" width="60%" />  
+    <img src="/images/posts/other/23.png" width="60%" />  
 </div>
 &emsp;&emsp;可以看到flag已经出来了。
 
