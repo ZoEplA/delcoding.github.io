@@ -458,3 +458,6 @@ print(base64.b64encode(iv_de))
 <div align="center">
     <img src="/images/posts/bugku/113.png" />  
 </div>
+&emsp;&emsp;<b>参考链接：</b>
+<a href="http://p0sec.net/index.php/archives/99/">CBC字节翻转攻击</a><br>
+<a href="http://drops.xmd5.com/static/drops/tips-7828.html">CBC字节翻转攻击</a>
