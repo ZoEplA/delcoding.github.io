@@ -138,7 +138,7 @@ s878926199a
 </div>
 &emsp;&emsp;打开页面后发现提交表单没有反应，然后想起题目提示，所以尝试一下`get`一个请求。然后可以找到源码：
 <div align="center">
-    <img src="/images/posts/bugku/78.png" >  
+    <img src="/images/posts/bugku/78.PNG" >  
 </div>
 <div align="center">
     <img src="/images/posts/bugku/79.png" >  
