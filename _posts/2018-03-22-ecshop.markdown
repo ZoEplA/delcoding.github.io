@@ -1,0 +1,49 @@
+---
+layout: post
+title: "渗透某不可言语的商场"
+date: 2018-03-22 22：00
+categories: jekyll update
+---
+
+# 前言
+&emsp;&emsp;很长一段时间没有日站了，特别是近期精力都放在了`CTF`中，今天在看某大佬的博客的时候发现`打码不严`，，然后被我找到了目标站，所以决定拿来练练手。
+
+&emsp;&emsp;首先是这样的一个站。。。。。
+<div align="center">
+    <img src="/images/posts/shentou/1.png" >  
+</div>
+&emsp;&emsp;好像很有趣的样子，，然后祭出我们的扫描器看看有什么发现。
+<div align="center">
+    <img src="/images/posts/shentou/2.png" height="60%" >  
+</div>
+&emsp;&emsp;这里发现有`robots.txt`，然后我们访问一下。
+<div align="center">
+    <img src="/images/posts/shentou/3.png" height="60%" >  
+</div>
+<div align="center">
+    <img src="/images/posts/shentou/4.png" >  
+</div>
+&emsp;&emsp;可以看到后台地址已经被我们拿到了，而且可以确定是`ecshop cms`。这里使用了大佬提供的自动化工具：
+>链接：https://pan.baidu.com/s/1AUpv79odaYByvA9oprUkoA 密码：5z13
+
+&emsp;&emsp;下载后我们使用一下。
+<div align="center">
+    <img src="/images/posts/shentou/5.png" >  
+</div>
+&emsp;&emsp;发现确实可以拿到`admin`的密码。这里作者对这所谓的`exp`甚是好奇，所以就抓包分析了一下。
+<div align="center">
+    <img src="/images/posts/shentou/6.png" >  
+</div>
+&emsp;&emsp;可以看到，漏洞的位置是在：`/flow.php?step=update_cart`。把`body`部分拿出来解码一下，得到如下：
+```goods_number[1' and (select 1 from(select count(*),concat((select (select (SELECT concat(user_name,0x7c,password) FROM ecs_admin_user limit 0,1)) from information_schema.tables limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a) and 1=1 #]=1&submit=exp
+```
+&emsp;&emsp;可以发现就是一个`post`请求的`sql报错注入`。而它的返回值如下：
+<div align="center">
+    <img src="/images/posts/shentou/7.png" >  
+</div>
+&emsp;&emsp;但其实这个洞已经挺久的了，并不能通杀全系列版本。。。
+
+&emsp;&emsp;这里注入出了几个账号，但都无法解密，后来一想顺着`前人留下`的后门看看能不能进去，然后还真的就进去了，，但权限低得可怜。。。
+<div align="center">
+    <img src="/images/posts/shentou/8.png" >  
+</div>
