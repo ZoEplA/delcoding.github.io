@@ -22,10 +22,10 @@ if((string)$_POST['param1']!==(string)$_POST['param2'] && md5($_POST['param1'])=
 
 &emsp;&emsp;这里google了两个图片。
 <div align="center">
-    <img src="/images/posts/qwb/md5_1.jpg" >  
+    <img src="/images/posts/qwb/md5_1.jpg" height="50%" />  
 </div>
 <div align="center">
-    <img src="/images/posts/qwb/md5_2.jpg" >  
+    <img src="/images/posts/qwb/md5_2.jpg" height="50%" />  
 </div>
 &emsp;&emsp;我们使用python将文件读取出来并进行`url编码`。
 ```python
